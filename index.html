@@ -1,0 +1,515 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>OrcaFlow</title>
+  <meta name="description" content="OrcaFlow helps small service businesses send professional estimates, follow up automatically, and turn accepted quotes into jobs.">
+  <link rel="icon" href="orca.png" type="image/png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Caveat:wght@600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #061120;
+      --bg-2: #0a1a2f;
+      --panel: #0d2038;
+      --line: #1b3352;
+      --text: #f1f5fb;
+      --muted: #a7b6cc;
+      --blue: #1e9bf0;
+      --blue-2: #39b0ff;
+      --light-bg: #eef3f9;
+      --light-card: #ffffff;
+      --light-text: #0b1b30;
+      --light-muted: #45566e;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Plus Jakarta Sans", system-ui, "Segoe UI", Roboto, Arial, sans-serif;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+    a { color: inherit; text-decoration: none; }
+    img.glow { filter: drop-shadow(0 0 1.2px rgba(255,255,255,.9)) drop-shadow(0 0 .6px #fff); object-fit: contain; }
+    .wrap { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+    .eyebrow {
+      font-size: .78rem; font-weight: 700; letter-spacing: .22em; text-transform: uppercase;
+      color: var(--blue-2); margin: 0 0 14px;
+    }
+    .btn {
+      display: inline-flex; align-items: center; gap: 10px;
+      padding: 14px 26px; border-radius: 10px; font-weight: 700;
+      background: var(--blue); color: #fff; border: 1px solid var(--blue);
+      transition: background .15s, transform .15s;
+    }
+    .btn:hover { background: var(--blue-2); transform: translateY(-1px); }
+    .btn svg { width: 18px; height: 18px; }
+
+    /* Header */
+    header { position: absolute; top: 0; left: 0; right: 0; z-index: 10; }
+    .nav { display: flex; align-items: center; justify-content: space-between; padding: 22px 24px; max-width: 1120px; margin: 0 auto; }
+    .logo { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 1.7rem; letter-spacing: -.02em; }
+    .logo img { width: 56px; height: 56px; }
+    .logo .flow { color: var(--blue-2); }
+    .nav ul { list-style: none; display: flex; gap: 34px; margin: 0; padding: 0; font-weight: 500; font-size: .95rem; }
+    .nav ul a:hover { color: var(--blue-2); }
+    .nav .btn { padding: 10px 18px; font-size: .9rem; }
+
+    /* Hero */
+    .hero {
+      position: relative; padding: 150px 0 90px;
+      background:
+        radial-gradient(800px 420px at 80% 30%, rgba(30,155,240,.18), transparent 70%),
+        linear-gradient(180deg, #071426 0%, var(--bg) 100%);
+      border-bottom: 1px solid var(--line);
+    }
+    .hero-grid { display: grid; grid-template-columns: 1.1fr 1fr; gap: 40px; align-items: center; }
+    .hero h1 { font-size: clamp(2.1rem, 4.4vw, 3.2rem); line-height: 1.08; letter-spacing: -.03em; margin: 0 0 22px; font-weight: 800; }
+    .hero h1 .hl { color: var(--blue-2); }
+    .hero p.sub { color: #d4deeb; font-size: 1.12rem; max-width: 46ch; margin: 0 0 32px; }
+    .hero-cta { display: flex; flex-wrap: wrap; align-items: center; gap: 24px; }
+    .hero-note { display: flex; gap: 28px; margin-top: 26px; color: var(--muted); font-size: .9rem; flex-wrap: wrap; }
+    .hero-note span { display: inline-flex; align-items: center; gap: 8px; }
+    .hero-note svg { width: 18px; height: 18px; color: var(--blue-2); }
+
+    /* Device mockups: realistic laptop (16:10 screen) and phone (about 9:19.5).
+       Sizes inside each screen use cqw (percent of the screen width) so everything scales together. */
+    .devices { position: relative; padding: 0 6% 9% 0; }
+
+    .laptop { position: relative; width: 100%; filter: drop-shadow(0 40px 50px rgba(0,0,0,.55)); }
+    .lid {
+      container-type: inline-size; position: relative; background: #050506; padding: 2.4% 2.4% 3.2%;
+      border-radius: 3.2% 3.2% 0 0 / 5% 5% 0 0;
+      box-shadow: 0 0 0 1.5px #8d939b, 0 0 0 3px #3a3e44, inset 0 0 0 1px #1d1f23;
+    }
+    .lid::before { /* camera */
+      content: ""; position: absolute; top: .95%; left: 50%; width: .9%; aspect-ratio: 1;
+      transform: translateX(-50%); border-radius: 50%; background: radial-gradient(circle at 35% 35%, #4a5a70, #0b0d10 60%);
+    }
+    .lid::after { /* soft glass reflection */
+      content: ""; position: absolute; inset: 2.4% 2.4% 3.2%; pointer-events: none;
+      background: linear-gradient(115deg, rgba(255,255,255,.07) 0%, rgba(255,255,255,0) 38%);
+    }
+    .lid .brandmark { position: absolute; bottom: .6%; left: 0; right: 0; text-align: center; font-size: .55rem; color: #6b7178; letter-spacing: .08em; }
+    .screen {
+      aspect-ratio: 16 / 10; overflow: hidden; background: #0a1626;
+      display: grid; grid-template-columns: 21% 1fr; font-size: 1.85cqw; line-height: 1.35;
+    }
+    .base {
+      position: relative; height: 0; padding-bottom: 3.4%; margin: 0 -7.5%;
+      background: linear-gradient(180deg, #e9ebee 0%, #c4c8cd 28%, #9ea3aa 70%, #6f747b 100%);
+      border-radius: 2px 2px 45% 45% / 2px 2px 100% 100%;
+      box-shadow: inset 0 1px 0 #fff;
+    }
+    .base::before { /* finger notch */
+      content: ""; position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+      width: 15%; height: 42%; border-radius: 0 0 10px 10px / 0 0 6px 6px;
+      background: linear-gradient(180deg, #8b9097, #b7bbc1);
+    }
+    .base::after { /* shadow on the "table" */
+      content: ""; position: absolute; left: 4%; right: 4%; bottom: -18px; height: 18px;
+      background: radial-gradient(ellipse at center top, rgba(0,0,0,.6), transparent 70%);
+    }
+
+    .side { background: #08121f; border-right: 1px solid #16263b; padding: 1.4em .9em; }
+    .mini-logo { display: flex; align-items: center; gap: .35em; font-weight: 800; font-size: 1.15em; margin-bottom: 1.3em; }
+    .mini-logo img { width: 1.7em; height: 1.7em; }
+    .mini-logo b { color: var(--blue-2); }
+    .side div.item { padding: .5em .7em; border-radius: .45em; color: #9fb0c6; margin-bottom: .25em; }
+    .side div.item.on { background: #13365a; color: #fff; }
+    .dash { padding: 1.3em 1.5em; }
+    .dash h4 { margin: 0 0 1em; font-size: 1.25em; }
+    .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: .6em; margin-bottom: .8em; }
+    .stat { background: #0e1e33; border: 1px solid #1a2f4b; border-radius: .55em; padding: .6em .8em; }
+    .stat small { display: block; color: #8ea2bb; font-size: .78em; }
+    .stat strong { font-size: 1.5em; }
+    .stat.blue strong { color: var(--blue-2); }
+    .stat.warn strong { color: #fb923c; }
+    .chart { background: #0e1e33; border: 1px solid #1a2f4b; border-radius: .55em; padding: .6em .8em; margin-bottom: .8em; }
+    .chart small { color: #8ea2bb; font-size: .8em; }
+    .chart svg { width: 100%; height: 5.5em; display: block; }
+    .activity div { display: flex; justify-content: space-between; padding: .3em 0; color: #c3cfde; border-bottom: 1px solid #13253c; }
+    .activity div span:last-child { color: #7f93ad; }
+    .activity div span:first-child::before { content: ""; display: inline-block; width: .5em; height: .5em; border-radius: 50%; background: var(--blue-2); margin-right: .6em; vertical-align: middle; }
+
+    .phone {
+      container-type: inline-size; position: absolute; right: 0; bottom: 0; width: 24%; aspect-ratio: 9 / 19.5;
+      padding: 1.6%; border-radius: 17% / 7.8%;
+      background: linear-gradient(135deg, #5d636b, #2b2f35 40%, #4a4f57 70%, #23262b);
+      box-shadow: 0 30px 50px rgba(0,0,0,.65), inset 0 0 0 1px rgba(255,255,255,.18);
+    }
+    .phone::before, .phone::after { /* side buttons */
+      content: ""; position: absolute; width: 2.2%; border-radius: 2px; background: #3c4047;
+    }
+    .phone::before { left: -1.6%; top: 20%; height: 9%; box-shadow: 0 6.5em 0 #3c4047; }
+    .phone::after { right: -1.6%; top: 27%; height: 14%; }
+    .phone-screen {
+      position: relative; height: 100%; overflow: hidden;
+      background: #060d18; border-radius: 15% / 7%; border: 2.5px solid #000;
+      font-size: 6cqw; line-height: 1.35; display: flex; flex-direction: column;
+    }
+    .phone-screen::after { /* glass reflection */
+      content: ""; position: absolute; inset: 0; pointer-events: none;
+      background: linear-gradient(120deg, rgba(255,255,255,.08), rgba(255,255,255,0) 45%);
+    }
+    .island { position: absolute; top: 2.2%; left: 50%; transform: translateX(-50%); width: 27%; height: 4.3%; background: #000; border-radius: 99px; }
+    .status { display: flex; justify-content: space-between; align-items: center; padding: 4.6% 8% 0 11%; font-weight: 700; font-size: .95em; }
+    .status svg { height: .8em; width: auto; }
+    .status .icons { display: flex; gap: .35em; align-items: center; }
+    .app-bar { display: flex; justify-content: space-between; align-items: center; padding: 8% 7% 5%; color: #9fb0c6; font-size: 1.1em; }
+    .app-bar .mini-logo { margin: 0; font-size: 1.15em; color: #fff; }
+    .phone-body { padding: 0 6%; flex: 1; }
+    .est { background: #0e1e33; border: 1px solid #1a2f4b; border-radius: .9em; padding: .9em; }
+    .est .row { display: flex; justify-content: space-between; align-items: center; color: #9fb0c6; font-size: .9em; }
+    .pill { background: #15803d; color: #fff; font-size: .8em; font-weight: 700; padding: .15em .6em; border-radius: 99px; }
+    .est .amt { font-size: 2em; font-weight: 800; margin: .3em 0 .1em; }
+    .est p { margin: 0; color: #9fb0c6; font-size: .9em; }
+    .est p b { color: #fff; }
+    .phone .view { display: block; text-align: center; margin-top: .9em; background: var(--blue); border-radius: .6em; padding: .65em; font-weight: 700; }
+    .next { margin-top: 1em; }
+    .next h5 { margin: 0 0 .5em; font-size: 1em; }
+    .next div { display: flex; justify-content: space-between; background: #0e1e33; border: 1px solid #1a2f4b; border-radius: .7em; padding: .6em .8em; margin-bottom: .45em; font-size: .9em; }
+    .next div span:last-child { color: var(--blue-2); font-weight: 700; }
+    .tabs { display: grid; grid-template-columns: repeat(4, 1fr); border-top: 1px solid #16263b; padding: .7em 3% 0; text-align: center; font-size: .7em; color: #7f93ad; }
+    .tabs span.on { color: var(--blue-2); }
+    .tabs svg { display: block; margin: 0 auto .2em; width: 1.9em; height: 1.9em; }
+    .home-bar { width: 36%; height: .4em; background: #e5e7eb; border-radius: 99px; margin: .9em auto .6em; }
+
+    /* Features */
+    .features { padding: 56px 0; background: var(--bg-2); border-bottom: 1px solid var(--line); }
+    .feat-grid { display: grid; grid-template-columns: repeat(6, 1fr); }
+    .feat { padding: 8px 20px; border-left: 1px solid var(--line); }
+    .feat:first-child { border-left: 0; padding-left: 0; }
+    .icon {
+      width: 52px; height: 52px; border-radius: 12px; border: 1.5px solid var(--blue);
+      display: grid; place-items: center; color: var(--blue-2); margin-bottom: 18px;
+      background: rgba(30,155,240,.08);
+    }
+    .icon svg { width: 26px; height: 26px; }
+    .feat h3 { font-size: 1rem; margin: 0 0 8px; }
+    .feat p { margin: 0; color: var(--muted); font-size: .9rem; }
+
+    /* How it works */
+    .how { display: grid; grid-template-columns: 1fr 1fr; border-bottom: 1px solid var(--line); }
+    .how-art {
+      position: relative; min-height: 380px; overflow: hidden;
+      background:
+        radial-gradient(500px 300px at 30% 70%, rgba(30,155,240,.25), transparent 70%),
+        linear-gradient(135deg, #0b2440 0%, #061120 100%);
+      display: flex; align-items: center; justify-content: center; padding: 40px;
+    }
+    .script {
+      position: absolute; top: 34px; right: 34px; font-family: "Caveat", cursive;
+      font-size: 2.6rem; line-height: 1.1; color: var(--blue-2); transform: rotate(-8deg); text-align: right;
+    }
+    .notes { display: grid; gap: 12px; width: 100%; max-width: 330px; margin-top: 60px; }
+    .note {
+      display: flex; gap: 12px; align-items: center;
+      background: rgba(13,32,56,.9); border: 1px solid #234268; border-radius: 12px; padding: 12px 14px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.35); font-size: .88rem;
+    }
+    .note:nth-child(2) { margin-left: 28px; }
+    .note:nth-child(3) { margin-left: 56px; }
+    .note .dot { flex: none; width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; background: #13365a; color: var(--blue-2); }
+    .note .dot svg { width: 18px; height: 18px; }
+    .note small { display: block; color: var(--muted); font-size: .76rem; }
+
+    .how-text { padding: 56px 48px; background: var(--bg); }
+    .how-text h2 { font-size: clamp(1.7rem, 3vw, 2.2rem); line-height: 1.15; margin: 0 0 18px; letter-spacing: -.02em; }
+    .how-text > p { color: #d4deeb; margin: 0 0 34px; max-width: 46ch; }
+    .steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; position: relative; }
+    .steps::before { content: ""; position: absolute; top: 17px; left: 18px; right: 18%; height: 2px; background: #1e4672; }
+    .steps li { position: relative; }
+    .num { width: 36px; height: 36px; border-radius: 50%; background: var(--blue); display: grid; place-items: center; font-weight: 800; margin-bottom: 14px; position: relative; }
+    .steps h3 { font-size: 1rem; margin: 0 0 4px; }
+    .steps p { margin: 0; color: var(--muted); font-size: .85rem; }
+
+    /* Light band */
+    .band { background: var(--light-bg); color: var(--light-text); padding: 44px 0; }
+    .band-card {
+      background: var(--light-card); border-radius: 16px; padding: 30px 34px;
+      display: grid; grid-template-columns: auto 1.2fr 1fr; gap: 28px; align-items: center;
+      box-shadow: 0 10px 30px rgba(11,27,48,.08);
+    }
+    .band-card img { width: 96px; height: 96px; }
+    .band-card .eyebrow { color: #0b74c4; }
+    .band-card h2 { margin: 0 0 8px; font-size: 1.7rem; letter-spacing: -.02em; }
+    .band-card p { margin: 0; color: var(--light-muted); }
+    .checks { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 12px 20px; font-weight: 500; }
+    .checks li { display: flex; gap: 10px; align-items: center; }
+    .checks svg { flex: none; width: 20px; height: 20px; }
+
+    /* CTA + footer */
+    .cta {
+      position: relative; text-align: center; padding: 70px 0 0; overflow: hidden;
+      background: linear-gradient(180deg, #061120 0%, #04101f 100%);
+    }
+    .cta h2 { font-size: clamp(1.8rem, 3.4vw, 2.4rem); margin: 0 0 8px; letter-spacing: -.02em; }
+    .cta > .wrap > p { color: var(--muted); margin: 0 0 28px; }
+    .waves { display: block; width: 100%; height: 170px; margin-top: 30px; }
+    footer { position: relative; margin-top: -120px; padding-bottom: 30px; }
+    .foot { display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+    .foot .logo { font-size: 1.3rem; }
+    .foot .logo img { width: 40px; height: 40px; }
+    .foot nav { display: flex; gap: 28px; font-size: .9rem; color: #c3cfde; }
+    .foot nav a:hover { color: var(--blue-2); }
+    .tag { font-size: .72rem; letter-spacing: .25em; color: var(--blue-2); font-weight: 700; }
+    .copy { text-align: center; color: #6f84a0; font-size: .8rem; margin-top: 20px; }
+
+    /* Responsive */
+    @media (max-width: 960px) {
+      .nav ul { display: none; }
+      .hero { padding-top: 120px; }
+      .hero-grid { grid-template-columns: 1fr; gap: 56px; }
+      .feat-grid { grid-template-columns: repeat(3, 1fr); row-gap: 36px; }
+      .feat:nth-child(4) { border-left: 0; padding-left: 0; }
+      .how { grid-template-columns: 1fr; }
+      .band-card { grid-template-columns: auto 1fr; }
+      .band-card .checks { grid-column: 1 / -1; }
+    }
+    @media (max-width: 640px) {
+      .wrap { padding: 0 16px; }
+      .nav { padding: 16px; }
+      .logo { font-size: 1.35rem; }
+      .logo img { width: 42px; height: 42px; }
+      .nav .btn { display: none; }
+      .devices { padding: 0 4% 10% 0; }
+      .side div.item { padding: .35em .5em; }
+      .feat-grid { grid-template-columns: 1fr 1fr; }
+      .feat, .feat:nth-child(4) { border-left: 0; padding: 0 8px 0 0; }
+      .how-text { padding: 44px 16px; }
+      .how-art { padding: 24px 16px; min-height: 320px; }
+      .script { font-size: 2rem; top: 20px; right: 20px; }
+      .note:nth-child(2) { margin-left: 14px; }
+      .note:nth-child(3) { margin-left: 28px; }
+      .steps { grid-template-columns: 1fr 1fr; row-gap: 28px; }
+      .steps::before { display: none; }
+      .band-card { grid-template-columns: 1fr; padding: 24px 20px; }
+      .band-card img { width: 72px; height: 72px; }
+      .checks { grid-template-columns: 1fr; }
+      .foot { flex-direction: column; text-align: center; }
+      .foot nav { gap: 18px; flex-wrap: wrap; justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="nav">
+      <a class="logo" href="#top"><img class="glow" src="orca.png" alt=""><span>Orca<span class="flow">Flow</span></span></a>
+      <ul>
+        <li><a href="#features">Features</a></li>
+        <li><a href="#how">How it works</a></li>
+        <li><a href="#about">About</a></li>
+      </ul>
+      <a class="btn" href="#how">See how it works</a>
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="hero">
+      <div class="wrap hero-grid">
+        <div>
+          <p class="eyebrow">Estimates / Follow-ups / More jobs</p>
+          <h1>Send the quote.<br>OrcaFlow follows up.<br><span class="hl">Win more work.</span></h1>
+          <p class="sub">OrcaFlow helps small service businesses create professional estimates, automatically follow up with customers, and turn accepted quotes into jobs.</p>
+          <div class="hero-cta">
+            <a class="btn" href="#how">See how it works
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            </a>
+          </div>
+          <div class="hero-note">
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.5 2.5L16 9.5"/></svg>Coming soon</span>
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></svg>Built for small teams</span>
+          </div>
+        </div>
+
+        <div class="devices" aria-hidden="true">
+          <div class="laptop">
+            <div class="lid">
+              <div class="screen">
+                <div class="side">
+                  <div class="mini-logo"><img class="glow" src="orca.png" alt=""><span>Orca<b>Flow</b></span></div>
+                  <div class="item on">Dashboard</div>
+                  <div class="item">Customers</div>
+                  <div class="item">Estimates</div>
+                  <div class="item">Jobs</div>
+                  <div class="item">Templates</div>
+                  <div class="item">Settings</div>
+                </div>
+                <div class="dash">
+                  <h4>Dashboard</h4>
+                  <div class="stats">
+                    <div class="stat"><small>Draft estimates</small><strong>3</strong></div>
+                    <div class="stat"><small>Awaiting response</small><strong>5</strong></div>
+                    <div class="stat blue"><small>Accepted</small><strong>12</strong></div>
+                    <div class="stat"><small>Jobs scheduled</small><strong>4</strong></div>
+                    <div class="stat"><small>Accepted value</small><strong>$24,690</strong></div>
+                    <div class="stat warn"><small>Needs attention</small><strong>2</strong></div>
+                  </div>
+                  <div class="chart">
+                    <small>Estimate activity &middot; last 7 days</small>
+                    <svg viewBox="0 0 300 60" preserveAspectRatio="none">
+                      <defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#39b0ff" stop-opacity=".45"/><stop offset="1" stop-color="#39b0ff" stop-opacity="0"/></linearGradient></defs>
+                      <path d="M0 50 L40 44 L80 47 L120 34 L160 38 L200 26 L240 30 L300 8 L300 60 L0 60Z" fill="url(#g)"/>
+                      <path d="M0 50 L40 44 L80 47 L120 34 L160 38 L200 26 L240 30 L300 8" fill="none" stroke="#39b0ff" stroke-width="2"/>
+                    </svg>
+                  </div>
+                  <div class="activity">
+                    <div><span>Estimate #1042 was viewed</span><span>2h ago</span></div>
+                    <div><span>Reminder sent to Sam Rivera</span><span>5h ago</span></div>
+                    <div><span>Customer accepted estimate #1041</span><span>6h ago</span></div>
+                    <div><span>Job created from #1041</span><span>1d ago</span></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="base"></div>
+          </div>
+
+          <div class="phone">
+            <div class="phone-screen">
+              <div class="island"></div>
+              <div class="status">
+                <span>9:41</span>
+                <span class="icons">
+                  <svg viewBox="0 0 18 12" fill="#fff"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5.5" width="3" height="6.5" rx="1"/><rect x="10" y="3" width="3" height="9" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></svg>
+                  <svg viewBox="0 0 16 12" fill="#fff"><path d="M8 11.5l2.6-3.1a4 4 0 0 0-5.2 0zM3.6 6.2a7 7 0 0 1 8.8 0l1.6-1.9a9.6 9.6 0 0 0-12 0zM0 2.4l1.6 1.9a11.6 11.6 0 0 1 12.8 0L16 2.4a14 14 0 0 0-16 0z"/></svg>
+                  <svg viewBox="0 0 26 12"><rect x=".5" y=".5" width="22" height="11" rx="3" fill="none" stroke="#fff" stroke-opacity=".5"/><rect x="2" y="2" width="16" height="8" rx="1.8" fill="#fff"/><rect x="23.5" y="4" width="2" height="4" rx="1" fill="#fff" fill-opacity=".5"/></svg>
+                </span>
+              </div>
+              <div class="app-bar">
+                <span>&lsaquo;</span>
+                <div class="mini-logo"><img class="glow" src="orca.png" alt=""><span>Orca<b>Flow</b></span></div>
+                <span>&middot;&middot;&middot;</span>
+              </div>
+              <div class="phone-body">
+                <div class="est">
+                  <div class="row"><span>Estimate #1041</span><span class="pill">Accepted</span></div>
+                  <div class="amt">$2,450</div>
+                  <p><b>HVAC system repair</b><br>AC unit, heating &amp; cooling<br>Job scheduled</p>
+                </div>
+                <span class="view">View details</span>
+                <div class="next">
+                  <h5>Upcoming jobs</h5>
+                  <div><span>Lawn care, Lee</span><span>Tue</span></div>
+                  <div><span>Deep clean, Park</span><span>Thu</span></div>
+                </div>
+              </div>
+              <div class="tabs">
+                <span class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>Home</span>
+                <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg>Estimates</span>
+                <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>Customers</span>
+                <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></svg>Jobs</span>
+              </div>
+              <div class="home-bar"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="features" id="features">
+      <div class="wrap feat-grid">
+        <div class="feat">
+          <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg></div>
+          <h3>Create Estimates</h3><p>Build professional estimates with line items, tax and reusable templates.</p>
+        </div>
+        <div class="feat">
+          <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4z"/></svg></div>
+          <h3>Send Securely</h3><p>Email it or share a private link. Customers don't need an account.</p>
+        </div>
+        <div class="feat">
+          <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 1-15.5 6.2M3 12A9 9 0 0 1 18.5 5.8"/><path d="M18 2v4h-4M6 22v-4h4"/></svg></div>
+          <h3>Automatic Follow-Ups</h3><p>Polite reminders go out for you, and stop as soon as the customer answers.</p>
+        </div>
+        <div class="feat">
+          <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 14a6.5 6.5 0 0 1 3.5 6"/></svg></div>
+          <h3>Customer Decisions</h3><p>Customers accept, decline or request changes with one click.</p>
+        </div>
+        <div class="feat">
+          <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M3 13h18"/></svg></div>
+          <h3>Convert to Jobs</h3><p>Turn accepted estimates into jobs, then schedule and track them.</p>
+        </div>
+        <div class="feat">
+          <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V14M10 20V8M16 20v-9M22 20V4"/></svg></div>
+          <h3>Stay on Top</h3><p>A dashboard and timeline show what needs attention and what happened.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="how" id="how">
+      <div class="how-art" aria-hidden="true">
+        <div class="script">Less admin.<br>More jobs.</div>
+        <div class="notes">
+          <div class="note"><span class="dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4z"/></svg></span><div>Estimate #1043 sent<small>To Jordan Lee &middot; just now</small></div></div>
+          <div class="note"><span class="dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 1-15.5 6.2M3 12A9 9 0 0 1 18.5 5.8"/><path d="M18 2v4h-4M6 22v-4h4"/></svg></span><div>Reminder sent automatically<small>3 days later &middot; 9:00 am</small></div></div>
+          <div class="note"><span class="dot" style="background:#14532d;color:#4ade80"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><div>Estimate accepted<small>Job ready to schedule</small></div></div>
+        </div>
+      </div>
+      <div class="how-text">
+        <p class="eyebrow">How OrcaFlow works</p>
+        <h2>From Quote to Job<br>in 4 Simple Steps</h2>
+        <p>OrcaFlow keeps your work moving and your customers informed, without the chasing.</p>
+        <ol class="steps">
+          <li><div class="num">1</div><h3>Create</h3><p>Add your customer, build an estimate and set the details.</p></li>
+          <li><div class="num">2</div><h3>Send</h3><p>Email it, or share a secure link with your customer.</p></li>
+          <li><div class="num">3</div><h3>Follow Up</h3><p>OrcaFlow sends the reminders automatically.</p></li>
+          <li><div class="num">4</div><h3>Close</h3><p>Get the answer and turn it into a job.</p></li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="band" id="about">
+      <div class="wrap">
+        <div class="band-card">
+          <img src="orca.png" alt="">
+          <div>
+            <p class="eyebrow">Built for real businesses</p>
+            <h2>More Quotes. More Jobs.</h2>
+            <p>For cleaners, landscapers, plumbers, mobile mechanics and anyone who quotes before they work. OrcaFlow helps you look professional and stay organized.</p>
+          </div>
+          <ul class="checks">
+            <li><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="#1e9bf0"/><path d="M7 12.5l3.2 3.2L17 9" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Mobile-friendly</li>
+            <li><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="#1e9bf0"/><path d="M7 12.5l3.2 3.2L17 9" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Activity timeline</li>
+            <li><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="#1e9bf0"/><path d="M7 12.5l3.2 3.2L17 9" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Secure customer links</li>
+            <li><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="#1e9bf0"/><path d="M7 12.5l3.2 3.2L17 9" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Easy job tracking</li>
+            <li><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="#1e9bf0"/><path d="M7 12.5l3.2 3.2L17 9" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Automatic follow-ups</li>
+            <li><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="#1e9bf0"/><path d="M7 12.5l3.2 3.2L17 9" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Your data kept private</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="cta">
+      <div class="wrap">
+        <h2>Ready to get more work?</h2>
+        <p>OrcaFlow is in development and coming soon.</p>
+        <a class="btn" href="#how">See how it works
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </a>
+      </div>
+      <svg class="waves" viewBox="0 0 1440 170" preserveAspectRatio="none" aria-hidden="true">
+        <path d="M0 70 C 240 20, 480 120, 720 70 S 1200 20, 1440 70" fill="none" stroke="#1e9bf0" stroke-opacity=".35" stroke-width="1.5"/>
+        <path d="M0 90 C 240 40, 480 140, 720 90 S 1200 40, 1440 90" fill="none" stroke="#1e9bf0" stroke-opacity=".22" stroke-width="1.5"/>
+        <path d="M0 110 C 260 70, 500 150, 760 110 S 1220 70, 1440 110 L1440 170 L0 170Z" fill="#082340"/>
+        <path d="M0 135 C 260 105, 520 165, 780 135 S 1240 105, 1440 135 L1440 170 L0 170Z" fill="#0a2e52"/>
+      </svg>
+      <footer>
+        <div class="wrap">
+          <div class="foot">
+            <a class="logo" href="#top"><img class="glow" src="orca.png" alt=""><span>Orca<span class="flow">Flow</span></span></a>
+            <nav><a href="#features">Features</a><a href="#how">How it works</a><a href="#about">About</a></nav>
+            <span class="tag">SEND / FOLLOW UP / WIN</span>
+          </div>
+          <p class="copy">&copy; 2026 OrcaFlow</p>
+        </div>
+      </footer>
+    </section>
+  </main>
+</body>
+</html>
